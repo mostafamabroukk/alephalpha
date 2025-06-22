@@ -83,18 +83,6 @@ public class ShoppingListService {
                 .orElseThrow(() -> new RuntimeException("Shopping list not found"));
     }
 
-
-
-    // 3. Recommender Features
-    public List<String> suggestItems(String partialName) {
-        return itemRepository.findByName(partialName)
-                .stream()
-                .map(Item::getName)
-                .distinct()
-                .limit(5)
-                .toList();
-    }
-
     @Transactional
     public void deleteList(Long listId) {
         ShoppingList list = shoppingListRepository.findById(listId)
@@ -103,7 +91,16 @@ public class ShoppingListService {
     }
 
     public void deleteItemFromList(Long listId, Long itemId) {
+        ShoppingList list = shoppingListRepository.findById(listId)
+                .orElseThrow(() -> new RuntimeException("Shopping list not found"));
 
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+
+        ShoppingListItem sli = shoppingListItemRepository.findByShoppingListAndItem(list, item)
+                .orElseThrow(() -> new RuntimeException("Item not found in list"));
+
+        shoppingListItemRepository.delete(sli);
     }
 
 
